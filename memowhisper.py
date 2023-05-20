@@ -45,7 +45,7 @@ class MemoAudio(object):
         
 class AudioTranscript(object):
     
-    def __init__(self, file: pathlib.Path, model: pathlib.Path="whisper.cpp/models/ggml-medium.en.bin") -> None:
+    def __init__(self, file: pathlib.Path, model: pathlib.Path="whisper.cpp/models/ggml-small.en.bin") -> None:
         if not file.is_file():
             raise FileNotFoundError
 
@@ -54,12 +54,12 @@ class AudioTranscript(object):
         self.whisper = pathlib.Path("./whisper.cpp/main") 
  
     def get_transcript(self) -> None:
-        transcript = pathlib.Path(str(self.file) + ".txt" )
+        transcript = pathlib.Path(str(self.file) + ".txt")
         command = [
             self.whisper,
             "--print-colors",
             "--output-txt",
-            #"--diarize",
+            "--output-file", str(self.file),
             "-m", self.model,
             "-f", self.file,
         ]
