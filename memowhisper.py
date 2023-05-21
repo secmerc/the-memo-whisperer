@@ -78,29 +78,36 @@ class TranscriptSummary(object):
     def get_summary(self) -> pathlib.Path:
         file = self.file
         
-        with open(file, mode = "r") as f:
-            chunksize = 2048
+        with open(file, mode='r', encoding='ascii', errors='replace') as f:
+            chunksize = 1024
             first = True
             summary = ""
+            total_summary = ""
             
             while True:
-                chunk = f.read(chunksize).strip("\n")
-                log.info("Processing chunk {}".format(chunk))
+                # Avoid truncating words by reading in lines
+                chunk = f.readlines(chunksize)
+                
+                # Flatten into a single string, remove newlines
+                chunk = ''.join(chunk).replace('\n', '')
 
+                log.debug("Processing chunk {}".format(chunk))
                 if not chunk:
                     break
-                
-                # break into peices
-                # ask for summary
-                # if >1 piece, feed first summary back in + next chunk, ask to update summary with any new info
-                
+                                
                 if first == True:
-                    log.info("First prompt")
-                    prompt = "### Instruction: Concisely summarize the single quoted text '{}' ### Response: ".format(chunk)
+                    prompt = """
+### Human: Here are my notes: '{}' \n 
+### Assistant: Here is a concise summary of your notes as a markdown bulleted list: 
+""".format(chunk)
                 else:
-                    log.info("Second prompt")
-                    prompt = "### Instruction: Update this single quoted summary '{}' with any new information from single quoted text '{}'".format(summary, chunk)
+                    prompt = """
+### Human: This is my summary '{}' \n
+### Human: Here are additional notes: {} \n
+### Assistant: I have updated your original summary with new information from your additional notes, here it is as a concise markdown bulleted list: 
+""".format(summary, chunk)
                 
+                log.debug(prompt)
                 command = [
                         self.llama,
                         "-t", "8",
@@ -112,10 +119,20 @@ class TranscriptSummary(object):
                         "-n", "-1", 
                         "-p", prompt
                     ]
-                val = subprocess.run(command, check=True, capture_output=True, text=False)
-                print(val.stdout)
-                summary += val.stdout.decode('ascii', errors='ignore').split("### Response")[-1].strip("\n")
+                val = subprocess.run(command, check=True, capture_output=True, text=False)  
+                
+                output = val.stdout.decode('ascii', errors='ignore').split("### Assistant")[-1].strip("\n") 
+                
+                #manual accumulate to debug
+                total_summary += output
+                
+                #llm only accumulate
+                summary = output
                 first = False
+
+            log.info("Accumulated summary {}".format(total_summary))
+
+            log.info("Summary {}".format(summary))
 
 class TranscriptLedger(object):
 
@@ -168,6 +185,7 @@ if __name__ == "__main__":
                     epilog='its magic!')
 
     parser.add_argument("--path", required=False)
+    parser.add_argument("--summarize", action='store_true', required=False)
     args = parser.parse_args()
 
     if len(sys.argv) == 1:
@@ -200,17 +218,12 @@ if __name__ == "__main__":
         log.info("Transcribing: {}".format(file))
         transcript = AudioTranscript(audio).get_transcript()
 
-
-        # TODO: finish implementing summarization
-        """
-        transcript = file
-        log.info("Summarizing: {}".format(transcript))
-        summary = TranscriptSummary(transcript).get_summary()
-        """
+        if args.summarize:
+            log.info("Summarizing: {}".format(transcript))
+            summary = TranscriptSummary(transcript).get_summary()
 
         #store hashes in ledger only if we succeeded
         audiohash = get_file_hash(audio)
         log.info("Adding {} {} to ledger as: {} {}".format(file, audio, hash, audiohash))
         ledger.append(hash)
         ledger.append(audiohash)
-        
