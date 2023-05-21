@@ -31,6 +31,8 @@
                                      \_________.-' its magic
 ```
 
+# This is a pre-alpha work. Don't trip.
+
 # Problem 
 Voice memos trap your information in difficult to search audio files that often contain a lot of filler, and a few important gems. Another problem is that they may contain sensitive information you dont want to share with third parties.
 
