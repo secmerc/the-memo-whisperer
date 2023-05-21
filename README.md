@@ -45,7 +45,7 @@ m1 macbook + python + ffmpeg + whisper.cpp + llama.cpp
 1. Scan the target path for audio files `__main__`
 1. Convert to pcm 16bit wav with ffmpeg and write it to target path `class MemoAudio(object)` `get_audio(file)`
 1. Transcribe the wav file with whisper.cpp and write it to target path `class AudioTranscript(object)` `get_transcript(audio)`
-1. Summarize the transcription with llama.cpp `class TranscriptSummary(object)` `get_summary(transcript)`
+1. **Optionally** Summarize the transcription with llama.cpp `class TranscriptSummary(object)` `get_summary(transcript)`
 1. Write hashes of transcribed audio to a ledger stored in the target path `class TranscriptLedger(object):` `append(file)` `append(audio)`
 
 Easily searchable text files with full transcriptions & summaries, all while retaining original audio!
@@ -60,13 +60,19 @@ Easily searchable text files with full transcriptions & summaries, all while ret
 
 # Usage
 ```
-python3 memowhisper.py [path]
+python3 memowhisper.py [--path] [--summarize]
 
 #transcribe a path
-python3 memowhisper.py /path/to/memos 
+python3 memowhisper.py --path /path/to/memos 
 
 #transcribe apple voice memos
 python3 memowhisper.py 
+
+#transcribe and summarize apple voice memos
+python3 memowhisper.py --path --summarize
+
+#transcribe and summarize a path
+python3 memowhisper.py --summarize
 ```
 
 The transcription ledger is kept in the target path
