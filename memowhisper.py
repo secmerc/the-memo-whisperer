@@ -39,7 +39,7 @@ class MemoAudio(object):
             )
             return pathlib.Path(audio)
         except ffmpeg.Error as e:
-            raise e(f'An error occurred while converting the file: {e.stderr}')
+            raise e('An error occurred while converting the file: {}'.format(e.stderr))
              
 class AudioTranscript(object):
     
@@ -49,7 +49,7 @@ class AudioTranscript(object):
 
         self.file = file
         self.model = model
-        self.whisper = pathlib.Path("./whisper.cpp/main") 
+        self.whisper = pathlib.Path("whisper.cpp/main") 
  
     def get_transcript(self) -> None:
         transcript = pathlib.Path(str(self.file) + ".txt")
@@ -68,8 +68,8 @@ class TranscriptSummary(object):
 
     def __init__(self, file: pathlib.Path) -> None:
         # ./llama.cpp/main -t 8 -m ./llama.cpp/models/Wizard-Vicuna-13B-Uncensored.ggml.q5_0.bin --color -c 2048 --temp 0.7 --repeat_penalty 1.1 -n -1 -p "### Instruction: write a story about llamas ### Response:"
-        self.llama = pathlib.Path("./llama.cpp/main")
-        self.model = pathlib.Path("./llama.cpp/models/Wizard-Vicuna-13B-Uncensored.ggml.q5_0.bin")
+        self.llama = pathlib.Path("llama.cpp/main")
+        self.model = pathlib.Path("llama.cpp/models/Wizard-Vicuna-13B-Uncensored.ggml.q5_0.bin")
         if pathlib.Path(file).exists():
             self.file = file
         else:
