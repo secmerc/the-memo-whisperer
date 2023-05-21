@@ -175,7 +175,6 @@ if __name__ == "__main__":
     parser.add_argument('filename')
     args = parser.parse_args()
 
-    import pdb; pdb.set_trace()
     if not args.filename:
         source_dir = pathlib.Path(APPLE_VOICE_MEMO_PATH)
     else:
