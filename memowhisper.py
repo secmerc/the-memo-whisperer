@@ -118,8 +118,6 @@ class TranscriptSummary(object):
                 print(val.stdout)
                 summary += val.stdout.decode('ascii', errors='ignore').split("### Response")[-1].strip("\n")
                 first = False
-                import pdb; pdb.set_trace()
-        
 
 class TranscriptLedger(object):
 
