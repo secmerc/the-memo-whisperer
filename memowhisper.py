@@ -160,20 +160,19 @@ def get_file_hash(filepath):
     return hash
 
 APPLE_VOICE_MEMO_PATH = "/Library/Application Support/com.apple.voicememos/Recordings/"
-DEFAULT_ARG = "applevoicememo"
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
-                    prog='ProgramName',
-                    description='What the program does',
-                    epilog='Text at the bottom of help')
+                    prog='memowhisper',
+                    description='transcribe and summarize voice memos',
+                    epilog='its magic!')
 
     parser.add_argument("--path", required=False)
     args = parser.parse_args()
 
     if len(sys.argv) == 1:
-        source_dir = pathlib.Path(str(pathlib.Path.home())  + APPLE_VOICE_MEMO_PATH)
+        source_dir = pathlib.Path(str(pathlib.Path.home()) + APPLE_VOICE_MEMO_PATH)
     else:
         source_dir = pathlib.Path(args.path)
 
