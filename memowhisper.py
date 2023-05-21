@@ -4,10 +4,9 @@ import argparse
 import logging as log
 import ffmpeg
 import hashlib
-
+import sys
 
 log.basicConfig(encoding='utf-8', level=log.INFO)
-
 
 class MemoAudio(object):
 
@@ -41,8 +40,7 @@ class MemoAudio(object):
             return pathlib.Path(audio)
         except ffmpeg.Error as e:
             raise e(f'An error occurred while converting the file: {e.stderr}')
-        
-        
+             
 class AudioTranscript(object):
     
     def __init__(self, file: pathlib.Path, model: pathlib.Path="whisper.cpp/models/ggml-small.en.bin") -> None:
@@ -145,7 +143,6 @@ class TranscriptLedger(object):
     def __contains__(self, entry):
         return (entry in self.ledger)
 
-
 def get_file_hash(filepath):
     # Initialize the hash object with SHA-256 algorithm
     hasher = hashlib.sha256()
@@ -162,8 +159,8 @@ def get_file_hash(filepath):
     hash = hasher.hexdigest()
     return hash
 
-
-APPLE_VOICE_MEMO_PATH = "~/Library/Application Support/com.apple.voicememos/Recordings/"
+APPLE_VOICE_MEMO_PATH = "/Library/Application Support/com.apple.voicememos/Recordings/"
+DEFAULT_ARG = "applevoicememo"
 
 if __name__ == "__main__":
 
@@ -172,13 +169,15 @@ if __name__ == "__main__":
                     description='What the program does',
                     epilog='Text at the bottom of help')
 
-    parser.add_argument('filename')
+    parser.add_argument("--path", required=False)
     args = parser.parse_args()
 
-    if not args.filename:
-        source_dir = pathlib.Path(APPLE_VOICE_MEMO_PATH)
+    if len(sys.argv) == 1:
+        source_dir = pathlib.Path(str(pathlib.Path.home())  + APPLE_VOICE_MEMO_PATH)
     else:
-        source_dir = pathlib.Path(args.filename)
+        source_dir = pathlib.Path(args.path)
+
+    log.info("Target path set to: {}".format(str(source_dir)))
 
     ledger = TranscriptLedger(source_dir)
 
