@@ -125,7 +125,6 @@ class TranscriptLedger(object):
 
         name = ".transcribed"
         self.storage = path.joinpath(pathlib.Path(name))
-        #self.storage = path.cwd().joinpath(name)
 
         self.ledger = set()
 
