@@ -71,10 +71,10 @@ python3 memowhisper.py --path /path/to/memos
 python3 memowhisper.py 
 
 #transcribe and summarize apple voice memos
-python3 memowhisper.py --path --summarize
+python3 memowhisper.py --summarize
 
 #transcribe and summarize a path
-python3 memowhisper.py --summarize
+python3 memowhisper.py --path /path/to/memos --summarize
 ```
 
 The transcription ledger is kept in the target path
