@@ -1,12 +1,22 @@
-WHISPERBIN = whisper.cpp/main
-SMALLQUANTIZEDMODEL = whisper.cpp/models/ggml-small.en.bin whisper.cpp/models/ggml-small.en-q5_0
+WHISPERPATH := whisper.cpp
 
 
-transcription: $(WHISPERBIN) $(SMALLQUANTIZEDMODEL) 
-	cd whisper.cpp && bash models/download-ggml-model.sh small.en
-	cd whisper.cpp && make quantize && quantize models/ggml-small.en.bin models/ggml-small.en-q5_0.bin q5_0
-	cd whisper.cpp && make 
+WHISPERBIN := $(WHISPERPATH)/main
+SMALLMODEL := $(WHISPERPATH)/models/ggml-small.en.bin
+SMALLQUANTIZEDMODEL := $(WHISPERPATH)/models/ggml-small.en-q5_0.bin
 
+$(WHISPERBIN):
+	cd $(WHISPERPATH) && make 
+
+$(SMALLMODEL):
+	cd $(WHISPERPATH) && bash models/download-ggml-model.sh small.en
+
+$(SMALLQUANTIZEDMODEL):
+	cd $(WHISPERPATH) && make quantize && ./quantize models/ggml-small.en.bin models/ggml-small.en-q5_0.bin q5_0
+
+
+transcription: $(WHISPERBIN) $(SMALLMODEL) $(SMALLQUANTIZEDMODEL) 
+ 
 clean:
-	cd whisper.cpp && make clean
-	rm $(SMALLQUANTIZEDMODEL)
+	cd $(WHISPERPATH) && make clean
+	rm $(SMALLQUANTIZEDMODEL) $(SMALLMODEL)
