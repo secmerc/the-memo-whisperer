@@ -43,7 +43,7 @@ class MemoAudio(object):
              
 class AudioTranscript(object):
     
-    def __init__(self, file: pathlib.Path, model: pathlib.Path="whisper.cpp/models/ggml-small.en.bin") -> None:
+    def __init__(self, file: pathlib.Path, model: pathlib.Path="whisper.cpp/models/ggml-small.en-q5_0.bin") -> None:
         if not file.is_file():
             raise FileNotFoundError
 
@@ -77,7 +77,7 @@ class TranscriptSummary(object):
 
     def get_summary(self) -> pathlib.Path:
         file = self.file
-        
+
         with open(file, mode='r', encoding='ascii', errors='replace') as f:
             chunksize = 1024
             first = True
