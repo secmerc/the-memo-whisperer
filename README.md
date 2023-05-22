@@ -53,12 +53,9 @@ m1 macbook + python + ffmpeg + whisper.cpp + llama.cpp
 Easily searchable text files with full transcriptions & summaries, all while retaining original audio!
 
 # Installation
-1. Clone this repo: `git clone https://github.com/secmerc/the-memo-whisperer.git; cd the-memo-whisperer`
-1. Set up the venv and python dependencies: `python3 -m venv ./venv && pip install ffmpeg`
-1. Clone whisper.cpp inside this repo `git clone https://github.com/ggerganov/whisper.cpp.git`
-1. Build whisper.cpp per the instructions on the repo
-1. Clone llama.cpp inside this repo `git clone https://github.com/ggerganov/llama.cpp.git`
-1. Build llama.cpp per the instructions on the repo
+Install python dependencies in venv, build whisper.cpp, download and quantize small model. Everything you need to get started running on MacOS CPU.
+
+`git clone --recurse-submodule https://github.com/secmerc/the-memo-whisperer.git && cd the-memo-whisperer && make`
 
 # Usage
 ```
