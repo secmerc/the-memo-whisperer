@@ -6,7 +6,7 @@ import ffmpeg
 import hashlib
 import sys
 
-log.basicConfig(encoding='utf-8', level=log.INFO)
+log.basicConfig(encoding='utf-8', level=log.DEBUG)
 
 class MemoAudio(object):
 
@@ -102,12 +102,12 @@ class TranscriptSummary(object):
 """.format(chunk)
                 else:
                     prompt = """
-### Human: This is my summary '{}' \n
-### Human: Here are additional notes: {} \n
-### Assistant: I have updated your original summary with new information from your additional notes, here it is as a concise markdown bulleted list: 
+### Human: This is my summary:\n '{}' \n
+### Human: Here are additional notes:\n '{}' \n
+### Assistant: I have updated your summary with new information from your additional notes without removing any existing information. Here is the entire summary as a markdown bulleted list: 
 """.format(summary, chunk)
                 
-                log.debug(prompt)
+                log.debug("Prompt: {}".format(prompt))
                 command = [
                         self.llama,
                         "-t", "8",
@@ -121,8 +121,12 @@ class TranscriptSummary(object):
                     ]
                 val = subprocess.run(command, check=True, capture_output=True, text=False)  
                 
-                output = val.stdout.decode('ascii', errors='ignore').split("### Assistant")[-1].strip("\n") 
+                output = val.stdout.decode('ascii', errors='ignore')
+                log.debug("llama : {}".format(output))
+                output = output.split("### Assistant")[-1].strip("\n") 
+                output = '\n'.join(output.splitlines()[1:])
                 
+
                 #manual accumulate to debug
                 total_summary += output
                 
@@ -188,7 +192,7 @@ if __name__ == "__main__":
     parser.add_argument("--summarize", action='store_true', required=False)
     args = parser.parse_args()
 
-    if len(sys.argv) == 1:
+    if (len(sys.argv) == 1) or (not args.path):
         source_dir = pathlib.Path(str(pathlib.Path.home()) + APPLE_VOICE_MEMO_PATH)
     else:
         source_dir = pathlib.Path(args.path)
@@ -202,6 +206,7 @@ if __name__ == "__main__":
         #check if sha is in the ledger, this handles all cases of original audio or processed wav
         ## one edge case can be we have source audio and converted audio, but no txt transcription 
         ## we wont detect that here
+        """
         hash = get_file_hash(file)
         log.info("Processing {} {}".format(file, hash))
         if hash in ledger:
@@ -217,13 +222,18 @@ if __name__ == "__main__":
 
         log.info("Transcribing: {}".format(file))
         transcript = AudioTranscript(audio).get_transcript()
+        """
+
+        transcript = pathlib.Path("transcriptions/20200117 112217-1C68D6D0.m4a.wav.txt")
 
         if args.summarize:
             log.info("Summarizing: {}".format(transcript))
             summary = TranscriptSummary(transcript).get_summary()
 
+        """
         #store hashes in ledger only if we succeeded
         audiohash = get_file_hash(audio)
         log.info("Adding {} {} to ledger as: {} {}".format(file, audio, hash, audiohash))
         ledger.append(hash)
         ledger.append(audiohash)
+        """
