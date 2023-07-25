@@ -164,12 +164,16 @@ def get_file_hash(filepath):
     hasher = hashlib.sha256()
 
     # Open the file in binary mode
-    with open(filepath, 'rb') as file:
-        # Read the file in chunks to handle large files efficiently
-        chunk_size = 4096
-        for chunk in iter(lambda: file.read(chunk_size), b''):
-            # Update the hash object with the current chunk
-            hasher.update(chunk)
+    try:
+        with open(filepath, 'rb') as file:
+            # Read the file in chunks to handle large files efficiently
+            chunk_size = 4096
+            for chunk in iter(lambda: file.read(chunk_size), b''):
+                # Update the hash object with the current chunk
+                hasher.update(chunk)
+    except IsADirectoryError:
+        log.info("Skipping directory: {}".format(filepath))
+        pass
 
     # Get the final hash value as a hexadecimal string
     hash = hasher.hexdigest()
