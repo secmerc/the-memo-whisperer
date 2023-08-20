@@ -11,45 +11,37 @@ from memowhisper import APPLE_VOICE_MEMO_PATH
 
 log.basicConfig(encoding='utf-8', level=log.INFO)
 
-
+@streamlit.cache_data
 def get_transcription_sources():
-
     sources = dict()
     sources['iCloud Voice Memo'] = pathlib.Path(str(pathlib.Path.home()) + APPLE_VOICE_MEMO_PATH)
 
     return(sources)
 
+@streamlit.cache_data
+def get_memo_files(source_dir):
+    return [file for file in pathlib.Path(source_dir).glob('*') if MemoAudio._is_supported_audio(file)]
+
+
 if __name__ == "__main__":
 
-    streamlit.title("Memo Whisperer")
-
-    with streamlit.sidebar:  
-        streamlit.title("Memos")      
+    with streamlit.sidebar:
+        streamlit.title("The Memo Whisperer")  
         sources = get_transcription_sources()
-        selected_source = streamlit.selectbox("Detected sources", sources)
+        selected_source = streamlit.selectbox("Select a memo source", sources)
         
         streamlit.file_uploader("Choose a file", type=['m4a', 'wav'])
 
-    streamlit.header("Transcriptions")
+    streamlit.header("Memos")
 
-    transcribed_files = []
+    transcribed_files = [None]
     transcription_contents = ""
 
     source_dir = sources[selected_source]
     log.info("source dir: {}".format(source_dir))
-    ledger = TranscriptLedger(source_dir)
+    #ledger = TranscriptLedger(source_dir)
 
-    for file in pathlib.Path(source_dir).glob('*'):
-
-        #check if sha is in the ledger, this handles all cases of original audio or processed wav
-        ## one edge case can be we have source audio and converted audio, but no txt transcription 
-        ## we wont detect that here
-        hash = get_file_hash(file)
-        log.info("Processing {} {}".format(file, hash))
-        if hash in ledger:
-            transcribed_files.append("{}.wav.txt".format(file))
-            log.info("Skipping previously transcribed file: {}".format(file))
-            continue
+    files = get_memo_files(source_dir)
 
         #try:
         #    log.info("Converting to wav: {}".format(file))
@@ -67,10 +59,30 @@ if __name__ == "__main__":
         #ledger.append(hash)
         #ledger.append(audiohash)
 
-    selected_file = streamlit.selectbox("Selected file", transcribed_files)
+    selected_file = streamlit.selectbox(
+        label="Select a transcription", 
+        options=files, 
+        index=0,
+        label_visibility="collapsed",
+        format_func=lambda x: 'Select a memo file...' if x == None else x
+    )
     
     if selected_file is not None:
-        with open(selected_file, mode='r', encoding='ascii', errors='replace') as f:
-            transcription_contents = f.read()
+        transcription = pathlib.Path("{}.txt".format(selected_file))
+        height = 0
+        button = ""
+        try:
+            with open(transcription, mode='r', encoding='ascii', errors='replace') as f:
+                height = 500
+                transcription_contents = f.read()
+                button = "Delete transcription"
+        except FileNotFoundError:
+            height = 1
+            transcription_contents = ""
+            button= "Create transcription"
+
+        streamlit.button(button)
+        streamlit.text_area(label="Transcription text", value=transcription_contents, height=height, label_visibility='collapsed')
+        
     
-    streamlit.text_area("Transcription text", transcription_contents)
+    

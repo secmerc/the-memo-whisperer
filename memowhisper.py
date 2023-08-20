@@ -19,7 +19,8 @@ class MemoAudio(object):
 
         self.file = file
 
-    def _is_supported_audio(self, file: pathlib.Path) -> bool:
+    @classmethod
+    def _is_supported_audio(cls, file: pathlib.Path) -> bool:
         try:
             probe = ffmpeg.probe(file)
             audio_streams = [stream for stream in probe['streams'] if stream['codec_type'] == 'audio']
